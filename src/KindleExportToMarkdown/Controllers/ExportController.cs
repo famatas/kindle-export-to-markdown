@@ -7,11 +7,11 @@ namespace KindleExportToMarkdown.Controllers
     [ApiController]
     public class ExportController : ControllerBase
     {
-        private IReaderService readerService;
+        private IFileService fileService;
 
-        public ExportController(IReaderService readerService)
+        public ExportController(IFileService fileService)
         {
-            this.readerService = readerService;
+            this.fileService = fileService;
         }
 
         [HttpPost(Name = "ExportToMarkdown")]
@@ -19,9 +19,9 @@ namespace KindleExportToMarkdown.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> ExportToMarkdown(IFormFile file)
         {
-            if (file.Length > 0)
+            if (this.fileService.isValidFile(file))
             {
-                var result = await this.readerService.ReadContent(file);
+                var result = await this.fileService.ReadContent(file);
                 return Ok(result);
 
             }

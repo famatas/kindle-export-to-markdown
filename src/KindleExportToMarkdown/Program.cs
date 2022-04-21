@@ -10,7 +10,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton<IReaderService, ReaderFileService>();
+builder.Services.AddSingleton<IFileService, FileService>();
 
 var app = builder.Build();
 
