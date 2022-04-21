@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using KindleExportToMarkdown.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KindleExportToMarkdown.Controllers
@@ -7,17 +7,25 @@ namespace KindleExportToMarkdown.Controllers
     [ApiController]
     public class ExportController : ControllerBase
     {
-        [HttpGet(Name = "TestExportToMarkdown")]
-        public async Task<int> TestExportToMarkdown()
+        private IReaderService readerService;
+
+        public ExportController(IReaderService readerService)
         {
-            return await Task.FromResult<int>(1);
+            this.readerService = readerService;
         }
 
-        [HttpGet(Name = "ExportToMarkdown")]
+        [HttpPost(Name = "ExportToMarkdown")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> ExportToMarkdown()
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ExportToMarkdown(IFormFile file)
         {
-            return Ok();
+            if (file.Length > 0)
+            {
+                var result = await this.readerService.ReadContent(file);
+                return Ok(result);
+
+            }
+            return BadRequest();
         }
     }
 }
