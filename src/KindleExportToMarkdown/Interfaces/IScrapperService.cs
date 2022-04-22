@@ -2,6 +2,6 @@
 {
     public interface IScrapperService
     {
-        void GetFileContent();
+        String GetTitle(string document);
     }
 }

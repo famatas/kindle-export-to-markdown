@@ -8,10 +8,12 @@ namespace KindleExportToMarkdown.Controllers
     public class ExportController : ControllerBase
     {
         private IFileService fileService;
+        private IScrapperService scrapperService;
 
-        public ExportController(IFileService fileService)
+        public ExportController(IFileService fileService, IScrapperService scrapperService)
         {
             this.fileService = fileService;
+            this.scrapperService = scrapperService;
         }
 
         [HttpPost(Name = "ExportToMarkdown")]
@@ -21,8 +23,9 @@ namespace KindleExportToMarkdown.Controllers
         {
             if (this.fileService.isValidFile(file))
             {
-                var result = await this.fileService.ReadContent(file);
-                return Ok(result);
+                var content = await this.fileService.ReadContent(file);
+                var body = this.scrapperService.GetTitle(content);
+                return Ok(body);
 
             }
             return BadRequest();

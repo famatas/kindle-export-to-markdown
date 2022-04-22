@@ -5,7 +5,7 @@ namespace KindleExportToMarkdown.Services
 {
     public class FileService : IFileService
     {
-        private string[] permittedExtensions = { ".txt", ".pdf" };
+        private string[] permittedExtensions = { ".html", ".txt" };
 
         public bool isValidFile(IFormFile file)
         {

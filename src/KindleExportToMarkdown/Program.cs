@@ -11,6 +11,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<IFileService, FileService>();
+builder.Services.AddSingleton<IScrapperService, HTMLScrapperService>();
 
 var app = builder.Build();
 
