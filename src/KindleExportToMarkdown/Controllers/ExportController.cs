@@ -31,7 +31,28 @@ namespace KindleExportToMarkdown.Controllers
                 book.Title = this.scrapperService.GetTitle(document);
                 book.Author = this.scrapperService.GetAuthor(document);
 
-                return Ok(this.scrapperService.GetSectionTitle(document));
+                List<Chapter> chapters = new List<Chapter>();
+
+                var nextChapter = true;
+
+                while(nextChapter)
+                {
+                    Chapter chapter = new Chapter();
+                    chapter.Title = this.scrapperService.GetSectionTitle(document);
+                    this.scrapperService.RemoveSectionTitle(document);
+
+                    // Tengo 2 objetos noteHeading y noteText
+
+
+                    chapters.Add(chapter);
+
+                    var isLastChapter = this.scrapperService.isLastSection(document);
+                    nextChapter = (isLastChapter != true); 
+                }
+
+                book.Chapters = chapters;
+
+                return Ok(book);
             }
             return BadRequest();
         }

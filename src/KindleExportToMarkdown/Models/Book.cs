@@ -6,7 +6,7 @@
 
         public string Author { get; set; }
 
-        public Chapter[] Chapters { get; set; }
+        public List<Chapter> Chapters { get; set; }
         
     }
 }
