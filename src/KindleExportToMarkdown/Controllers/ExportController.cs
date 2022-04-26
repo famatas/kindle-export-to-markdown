@@ -1,4 +1,5 @@
 ﻿using KindleExportToMarkdown.Interfaces;
+using KindleExportToMarkdown.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KindleExportToMarkdown.Controllers
@@ -24,9 +25,13 @@ namespace KindleExportToMarkdown.Controllers
             if (this.fileService.isValidFile(file))
             {
                 var content = await this.fileService.ReadContent(file);
-                var body = this.scrapperService.GetTitle(content);
-                return Ok(body);
+                var document = this.scrapperService.GetDocument(content);
 
+                var book = new Book();
+                book.Title = this.scrapperService.GetTitle(document);
+                book.Author = this.scrapperService.GetAuthor(document);
+
+                return Ok(book);
             }
             return BadRequest();
         }
