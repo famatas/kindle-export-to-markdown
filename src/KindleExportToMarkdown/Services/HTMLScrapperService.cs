@@ -23,5 +23,11 @@ namespace KindleExportToMarkdown.Services
             var author = document.DocumentNode.QuerySelector("div.authors");
             return author.InnerText.Trim();
         }
+
+        public string GetSectionTitle(HtmlDocument document)
+        {
+            var author = document.DocumentNode.QuerySelector("div.sectionHeading");
+            return author.InnerText.Trim();
+        }
     }
 }

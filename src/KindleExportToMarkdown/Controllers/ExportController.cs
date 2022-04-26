@@ -31,7 +31,7 @@ namespace KindleExportToMarkdown.Controllers
                 book.Title = this.scrapperService.GetTitle(document);
                 book.Author = this.scrapperService.GetAuthor(document);
 
-                return Ok(book);
+                return Ok(this.scrapperService.GetSectionTitle(document));
             }
             return BadRequest();
         }

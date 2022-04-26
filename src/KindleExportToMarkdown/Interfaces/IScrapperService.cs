@@ -7,5 +7,6 @@ namespace KindleExportToMarkdown.Interfaces
         string GetTitle(HtmlDocument document);
         string GetAuthor(HtmlDocument document);
         HtmlDocument GetDocument(string document);
+        string GetSectionTitle(HtmlDocument document);
     }
 }
