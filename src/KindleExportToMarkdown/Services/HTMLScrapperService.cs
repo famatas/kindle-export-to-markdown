@@ -19,6 +19,7 @@ namespace KindleExportToMarkdown.Services
         public string GetSectionTitle(HtmlDocument document) => GetNodeValue(document, "div.sectionHeading");
         
         public void RemoveSectionTitle(HtmlDocument document) => RemoveElement(document, "div.sectionHeading");
+        public void RemoveNoteHeading(HtmlDocument document) => RemoveElement(document, "div.noteHeading");
 
         public bool IsLastSection(HtmlDocument document) => ContainsElement(document, "div.sectionHeading");
 

@@ -35,24 +35,53 @@ namespace KindleExportToMarkdown.Controllers
 
                 List<Chapter> chapters = new List<Chapter>();
 
-                var nextChapter = true;
+                var sameChapter = true;
+                var sameSection = true;
 
-                while(nextChapter)
+                while (sameChapter)
                 {
                     Chapter chapter = new Chapter();
                     chapter.Title = this.scrapperService.GetSectionTitle(document);
                     this.scrapperService.RemoveSectionTitle(document);
 
-                    // Tengo 2 objetos noteHeading y noteText
+                    // Cuando cambie de subtitulo, tengo que tambien controlar el titulo para ver si no se fue de capitulo 
+                    while(sameSection) // Mientras estemos en el mismo subtitulo
+                    {
+                        List<Subchapter> subChapters = new List<Subchapter>();
+                        List<Highlight> highlights = new List<Highlight>();
 
-                    var noteHeading = this.scrapperService.GetNoteHeading(document);
+                        // Tengo 2 objetos noteHeading (pagina y subtitulo) y noteText
+                        var noteHeading = this.scrapperService.GetNoteHeading(document);
 
-                    // Cuando cambie de subtitulo, tengo que tambien controlar el titulo para ver si no se fue de capitulo
+                        var subTitle = formatterService.ContainsSubTitle(noteHeading) ? formatterService.FormatSubTitle(noteHeading) : "EMPTY" ;
+                        Subchapter subChapter = new Subchapter();
+                        subChapter.Title = subTitle;
+
+                        var page = formatterService.FormatNotePage(noteHeading);
+                        var text = scrapperService.GetNoteText(document);
+
+                        scrapperService.RemoveNoteHeading(document);
+
+                        noteHeading = this.scrapperService.GetNoteHeading(document);
+                        var newSubtitile = formatterService.ContainsSubTitle(noteHeading) ? formatterService.FormatSubTitle(noteHeading) : "EMPTY";
+
+                        if(subTitle.Equals(newSubtitile)) // Estamos en la misma section
+                        {
+                            Highlight highlight = new Highlight();
+                            highlight.Page = page;
+                            highlight.Content = text;
+
+                            highlights.Add(highlight);
+                        } else
+                        {     
+                            // Ya no estamos en la misma section, hay que controla si estamos en el mismo capitulo sino continuar.
+                        }
+                    }
 
                     chapters.Add(chapter);
 
                     var isLastChapter = this.scrapperService.IsLastSection(document);
-                    nextChapter = (isLastChapter != true); 
+                    sameChapter = (isLastChapter != true); 
                 }
 
                 book.Chapters = chapters;
