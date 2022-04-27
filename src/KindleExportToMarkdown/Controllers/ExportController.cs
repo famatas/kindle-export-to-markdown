@@ -10,11 +10,13 @@ namespace KindleExportToMarkdown.Controllers
     {
         private IFileService fileService;
         private IScrapperService scrapperService;
+        private IFormatterService formatterService;
 
-        public ExportController(IFileService fileService, IScrapperService scrapperService)
+        public ExportController(IFileService fileService, IScrapperService scrapperService, IFormatterService formatterService)
         {
             this.fileService = fileService;
             this.scrapperService = scrapperService;
+            this.formatterService = formatterService;
         }
 
         [HttpPost(Name = "ExportToMarkdown")]
@@ -43,10 +45,13 @@ namespace KindleExportToMarkdown.Controllers
 
                     // Tengo 2 objetos noteHeading y noteText
 
+                    var noteHeading = this.scrapperService.GetNoteHeading(document);
+
+                    // Cuando cambie de subtitulo, tengo que tambien controlar el titulo para ver si no se fue de capitulo
 
                     chapters.Add(chapter);
 
-                    var isLastChapter = this.scrapperService.isLastSection(document);
+                    var isLastChapter = this.scrapperService.IsLastSection(document);
                     nextChapter = (isLastChapter != true); 
                 }
 
@@ -55,6 +60,13 @@ namespace KindleExportToMarkdown.Controllers
                 return Ok(book);
             }
             return BadRequest();
+        }
+
+        [HttpGet(Name = "test")]
+        public async Task<IActionResult> Test()
+        {
+
+            return Ok();
         }
     }
 }

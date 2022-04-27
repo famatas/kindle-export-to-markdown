@@ -5,10 +5,7 @@ namespace KindleExportToMarkdown.Services
 {
     public class HTMLScrapperService : IScrapperService
     {
-        public string GetTitle(HtmlDocument document)
-        {
-            return this.GetNodeValue(document, "div.bookTitle");
-        }
+        public string GetTitle(HtmlDocument document) => GetNodeValue(document, "div.bookTitle");
 
         public HtmlDocument GetDocument(string document)
         {
@@ -17,57 +14,21 @@ namespace KindleExportToMarkdown.Services
             return htmlDoc;
         }
 
-        public string GetAuthor(HtmlDocument document)
-        {
-            return this.GetNodeValue(document, "div.authors");
-        }
+        public string GetAuthor(HtmlDocument document) => GetNodeValue(document, "div.authors");
 
-        public string GetSectionTitle(HtmlDocument document)
-        {
-            return this.GetNodeValue(document, "div.sectionHeading");
-        }
+        public string GetSectionTitle(HtmlDocument document) => GetNodeValue(document, "div.sectionHeading");
+        
+        public void RemoveSectionTitle(HtmlDocument document) => RemoveElement(document, "div.sectionHeading");
 
-        private string GetNodeValue(HtmlDocument document, string selector)
-        {
-            var value = document.DocumentNode.QuerySelector(selector);
-            return value.InnerText.Trim();
-        }
-        public void RemoveSectionTitle(HtmlDocument document)
-        {
-            this.RemoveElement(document, "div.sectionHeading");
-        }
+        public bool IsLastSection(HtmlDocument document) => ContainsElement(document, "div.sectionHeading");
 
-        public bool isLastSection(HtmlDocument document)
-        {
-            var value = document.DocumentNode.QuerySelector("div.sectionHeading");
-            return value == null;
-        }
+        public string GetSubsectionTitle(HtmlDocument document) => throw new NotImplementedException();
 
-        public string GetSubsectionTitle(HtmlDocument document)
-        {
-            var noteHeading = this.GetNoteHeading(document);
-            // regex: - (:) (.*?) >
-            throw new NotImplementedException();
-        }
+        public string GetNoteText(HtmlDocument document) => GetNodeValue(document, "div.noteText");
 
-        public string GetNoteText(HtmlDocument document)
-        {
-            return this.GetNodeValue(document, "div.noteText");
-        }
+        public string GetNotePage(HtmlDocument document) => throw new NotImplementedException();        
 
-        public string GetNotePage(HtmlDocument document)
-        {
-            var noteHeading = this.GetNoteHeading(document);
-            // regex: (-|>) ([A-Z])\w+ [0-9\(\)]+
-
-            /*Ejemplos
-            Highlight(< span class="highlight_yellow">yellow</span>) - Page 634435
-
-            Highlight(<span class="highlight_yellow">yellow</span>) - 1: The
-                   Surprising Power of Atomic Habits > Page 15*/
-
-            throw new NotImplementedException();
-        }
+        public string GetNoteHeading(HtmlDocument document) => GetNodeValue(document, "div.noteHeading");
 
         private void RemoveElement(HtmlDocument document, string selector)
         {
@@ -75,9 +36,15 @@ namespace KindleExportToMarkdown.Services
             node.Remove();
         }
 
-        private string GetNoteHeading(HtmlDocument document)
+        private bool ContainsElement(HtmlDocument document, string selector)
         {
-            return this.GetNodeValue(document, "div.noteHeading");
+            var value = document.DocumentNode.QuerySelector(selector);
+            return value == null;
+        }
+        private string GetNodeValue(HtmlDocument document, string selector)
+        {
+            var value = document.DocumentNode.QuerySelector(selector);
+            return value.InnerText.Trim();
         }
     }
 }

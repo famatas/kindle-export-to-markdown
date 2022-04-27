@@ -11,7 +11,8 @@ namespace KindleExportToMarkdown.Interfaces
         string GetSubsectionTitle(HtmlDocument document);
         string GetNoteText(HtmlDocument document);
         string GetNotePage(HtmlDocument document);
+        string GetNoteHeading(HtmlDocument document);
         void RemoveSectionTitle(HtmlDocument document);
-        bool isLastSection(HtmlDocument document);
+        bool IsLastSection(HtmlDocument document);
     }
 }
