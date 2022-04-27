@@ -3,6 +3,6 @@
     public class Subchapter
     {
         public string Title {  get; set; }
-        public Highlight[] Highlights { get; set; }
+        public List<Highlight> Highlights { get; set; }
     }
 }

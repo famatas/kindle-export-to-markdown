@@ -4,6 +4,6 @@
     {
         public string Title { get; set; }
 
-        public Subchapter Subchapters { get; set; }
+        public List<Subchapter> Subchapters { get; set; }
     }
 }

@@ -19,17 +19,29 @@ namespace KindleExportToMarkdown.Services
         public string GetSectionTitle(HtmlDocument document) => GetNodeValue(document, "div.sectionHeading");
         
         public void RemoveSectionTitle(HtmlDocument document) => RemoveElement(document, "div.sectionHeading");
+
         public void RemoveNoteHeading(HtmlDocument document) => RemoveElement(document, "div.noteHeading");
 
         public bool IsLastSection(HtmlDocument document) => ContainsElement(document, "div.sectionHeading");
 
-        public string GetSubsectionTitle(HtmlDocument document) => throw new NotImplementedException();
-
-        public string GetNoteText(HtmlDocument document) => GetNodeValue(document, "div.noteText");
-
-        public string GetNotePage(HtmlDocument document) => throw new NotImplementedException();        
+        public string GetNoteText(HtmlDocument document) => GetNodeValue(document, "div.noteText");   
 
         public string GetNoteHeading(HtmlDocument document) => GetNodeValue(document, "div.noteHeading");
+
+        public bool IsNextElementNewChapter(HtmlDocument document)
+        {
+            var node = GetNextElement(document, "div.noteHeading");
+
+            node.GetAttributes(); // Hay que revisar xpath para ver si contiene un sectionHeading :l
+
+            return true;
+        }
+
+        private HtmlNode GetNextElement(HtmlDocument document, string selector)
+        {
+            var node = document.DocumentNode.QuerySelector(selector);
+            return node.NextSibling;
+        }
 
         private void RemoveElement(HtmlDocument document, string selector)
         {
@@ -39,13 +51,17 @@ namespace KindleExportToMarkdown.Services
 
         private bool ContainsElement(HtmlDocument document, string selector)
         {
-            var value = document.DocumentNode.QuerySelector(selector);
-            return value == null;
+            return GetNode(document, selector) == null;
         }
         private string GetNodeValue(HtmlDocument document, string selector)
         {
-            var value = document.DocumentNode.QuerySelector(selector);
-            return value.InnerText.Trim();
+            return GetNode(document, selector).InnerText.Trim();
+        }
+
+        private HtmlNode GetNode(HtmlDocument document, string selector)
+        {
+            var node = document.DocumentNode.QuerySelector(selector);
+            return node;
         }
     }
 }

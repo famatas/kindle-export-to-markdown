@@ -44,17 +44,18 @@ namespace KindleExportToMarkdown.Controllers
                     chapter.Title = this.scrapperService.GetSectionTitle(document);
                     this.scrapperService.RemoveSectionTitle(document);
 
-                    // Cuando cambie de subtitulo, tengo que tambien controlar el titulo para ver si no se fue de capitulo 
-                    while(sameSection) // Mientras estemos en el mismo subtitulo
-                    {
-                        List<Subchapter> subChapters = new List<Subchapter>();
-                        List<Highlight> highlights = new List<Highlight>();
+                    List<Subchapter> subChapters = new List<Subchapter>();
+                    List<Highlight> highlights = new List<Highlight>();
+                    Subchapter subChapter = new Subchapter();
 
+                    // Cuando cambie de subtitulo, tengo que tambien controlar el titulo para ver si no se fue de capitulo 
+                    while (sameSection) // Mientras estemos en el mismo subtitulo
+                    {
                         // Tengo 2 objetos noteHeading (pagina y subtitulo) y noteText
                         var noteHeading = this.scrapperService.GetNoteHeading(document);
 
                         var subTitle = formatterService.ContainsSubTitle(noteHeading) ? formatterService.FormatSubTitle(noteHeading) : "EMPTY" ;
-                        Subchapter subChapter = new Subchapter();
+                        
                         subChapter.Title = subTitle;
 
                         var page = formatterService.FormatNotePage(noteHeading);
@@ -73,8 +74,18 @@ namespace KindleExportToMarkdown.Controllers
 
                             highlights.Add(highlight);
                         } else
-                        {     
+                        {
                             // Ya no estamos en la misma section, hay que controla si estamos en el mismo capitulo sino continuar.
+                            subChapter.Highlights = highlights;
+                            subChapters.Add(subChapter);
+
+                            subChapter.Title = string.Empty;
+                            subChapter.Highlights = new List<Highlight>();
+
+                            if (true) // No es el mismo capitulo
+                            {
+                                chapter.Subchapters = subChapters;                             
+                            }
                         }
                     }
 
@@ -99,3 +110,4 @@ namespace KindleExportToMarkdown.Controllers
         }
     }
 }
+
