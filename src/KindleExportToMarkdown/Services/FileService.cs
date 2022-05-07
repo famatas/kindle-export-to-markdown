@@ -1,4 +1,5 @@
 ﻿using KindleExportToMarkdown.Interfaces;
+using KindleExportToMarkdown.Models;
 using System.Text;
 
 namespace KindleExportToMarkdown.Services
@@ -25,6 +26,34 @@ namespace KindleExportToMarkdown.Services
             }
 
             return result.ToString();
+        }
+
+        public async Task<Document> UpdateClasses(IFormFile file)
+        {
+            var content = await ReadContent(file);
+            var index = 0;
+            var result = new StringBuilder();            
+            using (var reader = new StringReader(content))
+            {
+                for (string line = reader.ReadLine(); line != null; line = reader.ReadLine())
+                {
+                    if (line.Contains("class=\"noteHeading\"")) line = line.Replace("class=\"noteHeading\"", $"class=\"noteHeading-{index}\"");
+                    else if (line.Contains("class=\"noteText\"")) line = line.Replace("class=\"noteText\"", $"class=\"noteText-{index}\"");
+                    else if (line.Contains("class=\"sectionHeading\"")) 
+                    {
+                        index++;
+                        line = line.Replace("class=\"sectionHeading\"", $"class=\"sectionHeading-{index}\""); 
+                    }
+                    
+                    result.Append(line.Clone());
+                }
+            }
+
+            return new Document()
+            {
+                Content = result.ToString(),
+                Size = index
+            };
         }
 
         private bool isEmpty(IFormFile file)

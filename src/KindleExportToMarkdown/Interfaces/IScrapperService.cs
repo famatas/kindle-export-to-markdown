@@ -13,5 +13,7 @@ namespace KindleExportToMarkdown.Interfaces
         void RemoveSectionTitle(HtmlDocument document);
         void RemoveNoteHeading(HtmlDocument document);
         bool IsLastSection(HtmlDocument document);
+        bool IsNextElementNewChapter(HtmlDocument document);
+        void RemoveNoteText(HtmlDocument document);
     }
 }

@@ -1,4 +1,5 @@
-﻿using KindleExportToMarkdown.Interfaces;
+﻿using HtmlAgilityPack;
+using KindleExportToMarkdown.Interfaces;
 using KindleExportToMarkdown.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,7 +28,11 @@ namespace KindleExportToMarkdown.Controllers
             if (this.fileService.isValidFile(file))
             {
                 var content = await this.fileService.ReadContent(file);
-                var document = this.scrapperService.GetDocument(content);
+                var updatedContent = await fileService.UpdateClasses(file);
+
+
+
+                /*var document = this.scrapperService.GetDocument(content);
 
                 var book = new Book();
                 book.Title = this.scrapperService.GetTitle(document);
@@ -62,29 +67,68 @@ namespace KindleExportToMarkdown.Controllers
                         var text = scrapperService.GetNoteText(document);
 
                         scrapperService.RemoveNoteHeading(document);
+                        scrapperService.RemoveNoteText(document);                       
 
-                        noteHeading = this.scrapperService.GetNoteHeading(document);
-                        var newSubtitile = formatterService.ContainsSubTitle(noteHeading) ? formatterService.FormatSubTitle(noteHeading) : "EMPTY";
 
-                        if(subTitle.Equals(newSubtitile)) // Estamos en la misma section
+                        if (scrapperService.IsNextElementNewChapter(document)) // No es el mismo capitulo
                         {
+                            List<Subchapter> scCopies = (from scc in subChapters
+                                                         select new Subchapter
+                                                         {
+                                                             Title = scc.Title,
+                                                             Highlights = scc.Highlights,
+                                                         }).ToList();
+
+
+                            chapter.Subchapters = scCopies;
+                            break;
+                        }
+                        else // Mismo capitulo
+                        {
+                            noteHeading = this.scrapperService.GetNoteHeading(document);
+                            var newSubtitile = formatterService.ContainsSubTitle(noteHeading) ? formatterService.FormatSubTitle(noteHeading) : "EMPTY";
+
                             Highlight highlight = new Highlight();
                             highlight.Page = page;
                             highlight.Content = text;
 
                             highlights.Add(highlight);
-                        } else
-                        {
-                            // Ya no estamos en la misma section, hay que controla si estamos en el mismo capitulo sino continuar.
-                            subChapter.Highlights = highlights;
-                            subChapters.Add(subChapter);
 
-                            subChapter.Title = string.Empty;
-                            subChapter.Highlights = new List<Highlight>();
-
-                            if (true) // No es el mismo capitulo
+                            if (subTitle.Equals(newSubtitile)) // Estamos en la misma section
                             {
-                                chapter.Subchapters = subChapters;                             
+                                // Something
+                            }
+                            else
+                            {
+                                // Ya no estamos en la misma section, hay que controlar si estamos en el mismo capitulo sino continuar.
+                                List<Highlight> copies = (from hc in highlights
+                                                          select new Highlight
+                                                          {
+                                                              Page = hc.Page,
+                                                              Content = hc.Content
+                                                          }).ToList();
+
+                                subChapter.Highlights = copies;
+
+                                subChapters.Add(subChapter.Clone());
+
+                                subChapter.Title = string.Empty;
+                                subChapter.Highlights = new List<Highlight>();
+                                highlights = new List<Highlight>();
+
+                                if (scrapperService.IsNextElementNewChapter(document)) // No es el mismo capitulo
+                                {
+                                    List<Subchapter> scCopies = (from scc in subChapters
+                                                                 select new Subchapter
+                                                                 {
+                                                                     Title = scc.Title,
+                                                                     Highlights = scc.Highlights,
+                                                                 }).ToList();
+
+
+                                    chapter.Subchapters = scCopies;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -97,7 +141,7 @@ namespace KindleExportToMarkdown.Controllers
 
                 book.Chapters = chapters;
 
-                return Ok(book);
+                return Ok(book);*/
             }
             return BadRequest();
         }
@@ -105,9 +149,39 @@ namespace KindleExportToMarkdown.Controllers
         [HttpGet(Name = "test")]
         public async Task<IActionResult> Test()
         {
+            var html =
+        @"<!DOCTYPE html>
+            <html>
+            <body>
+	            <h1>This is <b>bold</b> heading</h1>
+	            <p>This is <u>underlined</u> paragraph</p>
+	            <h2>This is <i>italic</i> heading</h2>
+	            <h2>This is new heading</h2>
+            </body>
+            </html> ";
 
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(html);
+
+            var node = htmlDoc.DocumentNode.SelectSingleNode("//body/h1");
+
+            HtmlNode sibling = node.NextSibling;
+
+            while (sibling != null)
+            {
+                if (sibling.NodeType == HtmlNodeType.Element)
+                    Console.WriteLine(sibling.OuterHtml.Contains("underlined"));
+
+                sibling = sibling.NextSibling;
+            }
             return Ok();
+        }
+
+        private void GetUpdatedHeadings()
+        {
+
         }
     }
 }
+
 

@@ -7,7 +7,7 @@ namespace KindleExportToMarkdown.Services
     {
         public bool ContainsSubTitle(string value)
         {
-            return string.IsNullOrEmpty(FormatSubTitle(value));
+            return !string.IsNullOrEmpty(FormatSubTitle(value));
         }
 
         public string FormatNotePage(string value)
@@ -18,7 +18,12 @@ namespace KindleExportToMarkdown.Services
         public string FormatSubTitle(string value)
         {
             // regex: - (:) (.*?) >
-            return GetRegexMatch(value, @"");
+            var c = value.Replace("\r\n", string.Empty);
+            c = c.Replace(System.Environment.NewLine, string.Empty);
+            c = Regex.Replace(c, @"\s+", " ");
+            var a = GetRegexMatch(c, @"(:) (.*?) >");
+            var s = !string.IsNullOrEmpty(a) ? a.Substring(1, a.Length - 2).Trim() : "";
+            return s;
         }
 
         public string GetRegexMatch(string value, string pattern)

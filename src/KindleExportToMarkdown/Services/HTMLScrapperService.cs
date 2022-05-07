@@ -21,6 +21,7 @@ namespace KindleExportToMarkdown.Services
         public void RemoveSectionTitle(HtmlDocument document) => RemoveElement(document, "div.sectionHeading");
 
         public void RemoveNoteHeading(HtmlDocument document) => RemoveElement(document, "div.noteHeading");
+        public void RemoveNoteText(HtmlDocument document) => RemoveElement(document, "div.noteText");
 
         public bool IsLastSection(HtmlDocument document) => ContainsElement(document, "div.sectionHeading");
 
@@ -30,11 +31,22 @@ namespace KindleExportToMarkdown.Services
 
         public bool IsNextElementNewChapter(HtmlDocument document)
         {
-            var node = GetNextElement(document, "div.noteHeading");
+            var emptyLine = true;
+            //var node = GetNextElement(document, "div.noteText"); // ACA ESTA EL ERROR, VER COMO MANEJAR SI VIENE VACIO SIN SALTAR AL SIGUIENTE ELEMENTO
+            var node = GetNode(document, "div");
+            while (emptyLine)
+            {
+                var a = node.OuterHtml.Replace("\r\n", string.Empty).Trim();
+                if (!String.IsNullOrEmpty(a))
+                {
+                    emptyLine = false;
+                    return node.OuterHtml.Contains("sectionHeading");
+                }
 
-            node.GetAttributes(); // Hay que revisar xpath para ver si contiene un sectionHeading :l
+                node = node.NextSiblingElement();
+            }
 
-            return true;
+            return false;
         }
 
         private HtmlNode GetNextElement(HtmlDocument document, string selector)
