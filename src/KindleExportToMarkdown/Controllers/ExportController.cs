@@ -10,10 +10,10 @@ namespace KindleExportToMarkdown.Controllers
     public class ExportController : ControllerBase
     {
         private IFileService fileService;
-        private IScrapperService scrapperService;
+        private IScrapperServiceV2 scrapperService;
         private IFormatterService formatterService;
 
-        public ExportController(IFileService fileService, IScrapperService scrapperService, IFormatterService formatterService)
+        public ExportController(IFileService fileService, IScrapperServiceV2 scrapperService, IFormatterService formatterService)
         {
             this.fileService = fileService;
             this.scrapperService = scrapperService;
@@ -26,11 +26,60 @@ namespace KindleExportToMarkdown.Controllers
         public async Task<IActionResult> ExportToMarkdown(IFormFile file)
         {
             if (this.fileService.isValidFile(file))
-            {
-                var content = await this.fileService.ReadContent(file);
+            {                
                 var updatedContent = await fileService.UpdateClasses(file);
 
+                var document = this.scrapperService.GetDocument(updatedContent.Content);
 
+                var book = new Book();
+                book.Title = this.scrapperService.GetTitle(document);
+                book.Author = this.scrapperService.GetAuthor(document);
+
+                List<Chapter> chapters = new List<Chapter>();
+
+                for (int i = 0; i < updatedContent.Size; i++)
+                {
+                    Chapter chapter = new Chapter();
+                    chapter.Title = this.scrapperService.GetSectionTitle(document, i);
+
+                    // We can use the noteHeader as pivot
+                    var noteHeading = this.scrapperService.GetNoteHeading(document, i);
+                    var noteHeadingNode = this.scrapperService.GetNoteHeadingNode(document, i);
+                    var subTitle = formatterService.ContainsSubTitle(noteHeading) ? formatterService.FormatSubTitle(noteHeading) : "EMPTY";
+
+                    Subchapter subChapter = new Subchapter();
+                    subChapter.Title = subTitle;
+
+                    var page = formatterService.FormatNotePage(noteHeading);
+                    var text = scrapperService.GetNoteText(document, i);
+
+                    List<Highlight> highlights = new List<Highlight>();
+
+                    Highlight highlight = new Highlight()
+                    {
+                        Page = page,
+                        Content = text
+                    };
+
+                    highlights.Add(highlight);
+
+                    while (noteHeadingNode.NextSibling != null)
+                    {
+                        noteHeadingNode = noteHeadingNode.NextSibling;
+
+                        scrapperService.RemoveNoteHeading(document);
+                        scrapperService.RemoveNoteText(document);
+
+                        noteHeading = scrapperService.GetNoteHeading(document, i);
+                        Highlight newHighlight = new Highlight()
+                        {
+                            Page = formatterService.FormatNotePage(noteHeading),
+                            Content = scrapperService.GetNoteText(document, i)
+                        };
+
+                        highlights.Add(newHighlight);
+                    }
+                }
 
                 /*var document = this.scrapperService.GetDocument(content);
 

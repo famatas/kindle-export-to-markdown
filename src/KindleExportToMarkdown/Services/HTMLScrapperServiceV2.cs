@@ -3,7 +3,7 @@ using KindleExportToMarkdown.Interfaces;
 
 namespace KindleExportToMarkdown.Services
 {
-    public class HTMLScrapperServiceV2 : IScrapperServiceV2
+    public class HTMLScrapperService : IScrapperServiceV2
     {
         public string GetTitle(HtmlDocument document) => GetNodeValue(document, "div.bookTitle");
 
@@ -16,16 +16,19 @@ namespace KindleExportToMarkdown.Services
 
         public string GetAuthor(HtmlDocument document) => GetNodeValue(document, "div.authors");
 
-        public string GetSectionTitle(HtmlDocument document) => GetNodeValue(document, "div.sectionHeading");
+        public string GetSectionTitle(HtmlDocument document, int index) => GetNodeValue(document, $"div.sectionHeading-{index}");
         
         public void RemoveSectionTitle(HtmlDocument document) => RemoveElement(document, "div.sectionHeading");
 
-        public void RemoveNoteHeading(HtmlDocument document) => RemoveElement(document, "div.noteHeading");
+        public void RemoveNoteHeading(HtmlDocument document, int index) => RemoveElement(document, $"div.noteHeading-{index}");
+
+        public HtmlNode GetNoteHeadingNode(HtmlDocument document, int index) => GetNode(document, $"div.sectionHeading-{index}");
+
         public void RemoveNoteText(HtmlDocument document) => RemoveElement(document, "div.noteText");
 
         public bool IsLastSection(HtmlDocument document) => ContainsElement(document, "div.sectionHeading");
 
-        public string GetNoteText(HtmlDocument document) => GetNodeValue(document, "div.noteText");   
+        public string GetNoteText(HtmlDocument document, int index) => GetNodeValue(document, $"div.noteText-{index}");   
 
         public string GetNoteHeading(HtmlDocument document) => GetNodeValue(document, "div.noteHeading");
 
@@ -74,6 +77,16 @@ namespace KindleExportToMarkdown.Services
         {
             var node = document.DocumentNode.QuerySelector(selector);
             return node;
+        }
+
+        public string GetNoteHeading(HtmlDocument document, int index)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RemoveNoteHeading(HtmlDocument document)
+        {
+            throw new NotImplementedException();
         }
     }
 }
