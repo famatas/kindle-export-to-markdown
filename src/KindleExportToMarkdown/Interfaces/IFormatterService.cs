@@ -1,4 +1,6 @@
-﻿namespace KindleExportToMarkdown.Interfaces
+﻿using KindleExportToMarkdown.Models;
+
+namespace KindleExportToMarkdown.Interfaces
 {
     public interface IFormatterService
     {
@@ -8,5 +10,6 @@
         bool ContainsSubTitle(string value);
 
         string RemoveExtraSpaces(string value);
+        string GetMarkdownCode(Book book);
     }
 }

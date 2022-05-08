@@ -1,4 +1,6 @@
 ﻿using KindleExportToMarkdown.Interfaces;
+using KindleExportToMarkdown.Models;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace KindleExportToMarkdown.Services
@@ -25,7 +27,6 @@ namespace KindleExportToMarkdown.Services
             var s = !string.IsNullOrEmpty(a) ? a.Substring(1, a.Length - 2).Trim() : "";
             return s;
         }
-
         public string GetRegexMatch(string value, string pattern)
         {
             return Regex.Match(value, pattern).Value;
@@ -37,6 +38,31 @@ namespace KindleExportToMarkdown.Services
             c = c.Replace(Environment.NewLine, string.Empty);
             c = Regex.Replace(c, @"\s+", " ");
             return c;
+        }
+
+        public string GetMarkdownCode(Book book)
+        {
+            StringBuilder strb = new StringBuilder();
+
+            strb.Append("# ").Append(book.Title).Append("\n\n");
+            strb.Append("> ").Append(book.Author).Append("\n\n");
+
+            foreach (var chapter in book.Chapters)
+            {
+                strb.Append("\n\n").Append("## ").Append(chapter.Title).Append("\n\n");
+
+                foreach (var subChapter in chapter.Subchapters)
+                {
+                    strb.Append("### ").Append(subChapter.Title).Append("\n\n\n");
+
+                    foreach (var highlight in subChapter.Highlights)
+                    {
+                        strb.Append("- ").Append(highlight.Content).Append(" **").Append(highlight.Page).Append("**").Append("\n\n");
+                    }
+                }
+            }
+
+            return strb.ToString();
         }
     }
 }
