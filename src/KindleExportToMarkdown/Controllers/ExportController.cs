@@ -25,131 +25,61 @@ namespace KindleExportToMarkdown.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> ExportToMarkdown(IFormFile file)
         {
-            if (this.fileService.isValidFile(file))
-            {                
-                var updatedContent = await fileService.UpdateClasses(file);
-
-                var document = this.scrapperService.GetDocument(updatedContent.Content);
-
-                var book = new Book();
-                book.Title = this.scrapperService.GetTitle(document);
-                book.Author = this.scrapperService.GetAuthor(document);
-
-                List<Chapter> chapters = new List<Chapter>();
-
-                for (int i = 0; i < updatedContent.Size; i++)
+            try
+            {
+                if (this.fileService.isValidFile(file))
                 {
-                    Chapter chapter = new Chapter();
-                    chapter.Title = this.scrapperService.GetSectionTitle(document, i);
+                    var updatedContent = await fileService.UpdateClasses(file);
 
-                    // We can use the noteHeader as pivot
-                    var noteHeading = this.scrapperService.GetNoteHeading(document, i);
-                    var noteHeadingNode = this.scrapperService.GetNoteHeadingNode(document, i);
-                    var subTitle = formatterService.ContainsSubTitle(noteHeading) ? formatterService.FormatSubTitle(noteHeading) : "EMPTY";
+                    var document = this.scrapperService.GetDocument(updatedContent.Content);
 
-                    Subchapter subChapter = new Subchapter();
-                    subChapter.Title = subTitle;
+                    var book = new Book();
+                    book.Title = this.scrapperService.GetTitle(document);
+                    book.Author = this.scrapperService.GetAuthor(document);
 
-                    var page = formatterService.FormatNotePage(noteHeading);
-                    var text = scrapperService.GetNoteText(document, i);
+                    List<Chapter> chapters = new List<Chapter>();
 
-                    List<Highlight> highlights = new List<Highlight>();
-
-                    Highlight highlight = new Highlight()
+                    for (int i = 1; i < updatedContent.Size; i++)
                     {
-                        Page = page,
-                        Content = text
-                    };
+                        Chapter chapter = new Chapter();
+                        List<Subchapter> subChapters = new List<Subchapter>();
+                        chapter.Title = this.scrapperService.GetSectionTitle(document, i);
 
-                    highlights.Add(highlight);
+                        // We can use the noteHeader as pivot
+                        var noteHeading = this.scrapperService.GetNoteHeading(document, i);
+                        var noteHeadingNode = this.scrapperService.GetNoteHeadingNode(document, i);
 
-                    while (noteHeadingNode.NextSibling != null)
-                    {
-                        noteHeadingNode = noteHeadingNode.NextSibling;
+                        var subTitle = formatterService.ContainsSubTitle(noteHeading) ? formatterService.FormatSubTitle(noteHeading) : "EMPTY";
 
-                        scrapperService.RemoveNoteHeading(document);
-                        scrapperService.RemoveNoteText(document);
-
-                        noteHeading = scrapperService.GetNoteHeading(document, i);
-                        Highlight newHighlight = new Highlight()
-                        {
-                            Page = formatterService.FormatNotePage(noteHeading),
-                            Content = scrapperService.GetNoteText(document, i)
-                        };
-
-                        highlights.Add(newHighlight);
-                    }
-                }
-
-                /*var document = this.scrapperService.GetDocument(content);
-
-                var book = new Book();
-                book.Title = this.scrapperService.GetTitle(document);
-                book.Author = this.scrapperService.GetAuthor(document);
-
-                List<Chapter> chapters = new List<Chapter>();
-
-                var sameChapter = true;
-                var sameSection = true;
-
-                while (sameChapter)
-                {
-                    Chapter chapter = new Chapter();
-                    chapter.Title = this.scrapperService.GetSectionTitle(document);
-                    this.scrapperService.RemoveSectionTitle(document);
-
-                    List<Subchapter> subChapters = new List<Subchapter>();
-                    List<Highlight> highlights = new List<Highlight>();
-                    Subchapter subChapter = new Subchapter();
-
-                    // Cuando cambie de subtitulo, tengo que tambien controlar el titulo para ver si no se fue de capitulo 
-                    while (sameSection) // Mientras estemos en el mismo subtitulo
-                    {
-                        // Tengo 2 objetos noteHeading (pagina y subtitulo) y noteText
-                        var noteHeading = this.scrapperService.GetNoteHeading(document);
-
-                        var subTitle = formatterService.ContainsSubTitle(noteHeading) ? formatterService.FormatSubTitle(noteHeading) : "EMPTY" ;
-                        
+                        Subchapter subChapter = new Subchapter();
                         subChapter.Title = subTitle;
 
                         var page = formatterService.FormatNotePage(noteHeading);
-                        var text = scrapperService.GetNoteText(document);
+                        var text = formatterService.RemoveExtraSpaces(scrapperService.GetNoteText(document, i));
 
-                        scrapperService.RemoveNoteHeading(document);
-                        scrapperService.RemoveNoteText(document);                       
+                        List<Highlight> highlights = new List<Highlight>();
 
-
-                        if (scrapperService.IsNextElementNewChapter(document)) // No es el mismo capitulo
+                        Highlight highlight = new Highlight()
                         {
-                            List<Subchapter> scCopies = (from scc in subChapters
-                                                         select new Subchapter
-                                                         {
-                                                             Title = scc.Title,
-                                                             Highlights = scc.Highlights,
-                                                         }).ToList();
+                            Page = page,
+                            Content = text
+                        };
 
+                        highlights.Add(highlight);
 
-                            chapter.Subchapters = scCopies;
-                            break;
-                        }
-                        else // Mismo capitulo
+                        while (noteHeadingNode.NextSibling != null && noteHeading !=null)
                         {
-                            noteHeading = this.scrapperService.GetNoteHeading(document);
-                            var newSubtitile = formatterService.ContainsSubTitle(noteHeading) ? formatterService.FormatSubTitle(noteHeading) : "EMPTY";
+                            noteHeadingNode = noteHeadingNode.NextSibling;
 
-                            Highlight highlight = new Highlight();
-                            highlight.Page = page;
-                            highlight.Content = text;
+                            scrapperService.RemoveNoteHeading(document, i);
+                            scrapperService.RemoveNoteText(document, i);
 
-                            highlights.Add(highlight);
+                            noteHeading = scrapperService.GetNoteHeading(document, i);
 
-                            if (subTitle.Equals(newSubtitile)) // Estamos en la misma section
+                            var newSubTitle = (noteHeading != null && formatterService.ContainsSubTitle(noteHeading)) ? formatterService.FormatSubTitle(noteHeading) : "EMPTY";
+
+                            if (!newSubTitle.Equals(subTitle) || noteHeading == null) // Sub chapter changed
                             {
-                                // Something
-                            }
-                            else
-                            {
-                                // Ya no estamos en la misma section, hay que controlar si estamos en el mismo capitulo sino continuar.
                                 List<Highlight> copies = (from hc in highlights
                                                           select new Highlight
                                                           {
@@ -165,33 +95,158 @@ namespace KindleExportToMarkdown.Controllers
                                 subChapter.Highlights = new List<Highlight>();
                                 highlights = new List<Highlight>();
 
-                                if (scrapperService.IsNextElementNewChapter(document)) // No es el mismo capitulo
+                                subTitle = newSubTitle;
+                                subChapter.Title = subTitle;
+                            }
+                            
+                            if (noteHeading != null)
+                            {
+                                Highlight newHighlight = new Highlight()
                                 {
-                                    List<Subchapter> scCopies = (from scc in subChapters
-                                                                 select new Subchapter
-                                                                 {
-                                                                     Title = scc.Title,
-                                                                     Highlights = scc.Highlights,
-                                                                 }).ToList();
+                                    Page = formatterService.FormatNotePage(noteHeading),
+                                    Content = formatterService.RemoveExtraSpaces(scrapperService.GetNoteText(document, i))
+                                };
+
+                                highlights.Add(newHighlight);
+                            }
+                        }
+
+                        List<Subchapter> scCopies = (from scc in subChapters
+                                                     select new Subchapter
+                                                     {
+                                                         Title = scc.Title,
+                                                         Highlights = scc.Highlights,
+                                                     }).ToList();
 
 
-                                    chapter.Subchapters = scCopies;
-                                    break;
+                        chapter.Subchapters = scCopies;
+
+                        chapters.Add(chapter);
+                    }
+
+                    book.Chapters = chapters;
+
+                    return Ok(book);
+
+                    /*var document = this.scrapperService.GetDocument(content);
+
+                    var book = new Book();
+                    book.Title = this.scrapperService.GetTitle(document);
+                    book.Author = this.scrapperService.GetAuthor(document);
+
+                    List<Chapter> chapters = new List<Chapter>();
+
+                    var sameChapter = true;
+                    var sameSection = true;
+
+                    while (sameChapter)
+                    {
+                        Chapter chapter = new Chapter();
+                        chapter.Title = this.scrapperService.GetSectionTitle(document);
+                        this.scrapperService.RemoveSectionTitle(document);
+
+                        List<Subchapter> subChapters = new List<Subchapter>();
+                        List<Highlight> highlights = new List<Highlight>();
+                        Subchapter subChapter = new Subchapter();
+
+                        // Cuando cambie de subtitulo, tengo que tambien controlar el titulo para ver si no se fue de capitulo 
+                        while (sameSection) // Mientras estemos en el mismo subtitulo
+                        {
+                            // Tengo 2 objetos noteHeading (pagina y subtitulo) y noteText
+                            var noteHeading = this.scrapperService.GetNoteHeading(document);
+
+                            var subTitle = formatterService.ContainsSubTitle(noteHeading) ? formatterService.FormatSubTitle(noteHeading) : "EMPTY" ;
+
+                            subChapter.Title = subTitle;
+
+                            var page = formatterService.FormatNotePage(noteHeading);
+                            var text = scrapperService.GetNoteText(document);
+
+                            scrapperService.RemoveNoteHeading(document);
+                            scrapperService.RemoveNoteText(document);                       
+
+
+                            if (scrapperService.IsNextElementNewChapter(document)) // No es el mismo capitulo
+                            {
+                                List<Subchapter> scCopies = (from scc in subChapters
+                                                             select new Subchapter
+                                                             {
+                                                                 Title = scc.Title,
+                                                                 Highlights = scc.Highlights,
+                                                             }).ToList();
+
+
+                                chapter.Subchapters = scCopies;
+                                break;
+                            }
+                            else // Mismo capitulo
+                            {
+                                noteHeading = this.scrapperService.GetNoteHeading(document);
+                                var newSubtitile = formatterService.ContainsSubTitle(noteHeading) ? formatterService.FormatSubTitle(noteHeading) : "EMPTY";
+
+                                Highlight highlight = new Highlight();
+                                highlight.Page = page;
+                                highlight.Content = text;
+
+                                highlights.Add(highlight);
+
+                                if (subTitle.Equals(newSubtitile)) // Estamos en la misma section
+                                {
+                                    // Something
+                                }
+                                else
+                                {
+                                    // Ya no estamos en la misma section, hay que controlar si estamos en el mismo capitulo sino continuar.
+                                    List<Highlight> copies = (from hc in highlights
+                                                              select new Highlight
+                                                              {
+                                                                  Page = hc.Page,
+                                                                  Content = hc.Content
+                                                              }).ToList();
+
+                                    subChapter.Highlights = copies;
+
+                                    subChapters.Add(subChapter.Clone());
+
+                                    subChapter.Title = string.Empty;
+                                    subChapter.Highlights = new List<Highlight>();
+                                    highlights = new List<Highlight>();
+
+                                    if (scrapperService.IsNextElementNewChapter(document)) // No es el mismo capitulo
+                                    {
+                                        List<Subchapter> scCopies = (from scc in subChapters
+                                                                     select new Subchapter
+                                                                     {
+                                                                         Title = scc.Title,
+                                                                         Highlights = scc.Highlights,
+                                                                     }).ToList();
+
+
+                                        chapter.Subchapters = scCopies;
+                                        break;
+                                    }
                                 }
                             }
                         }
+
+                        chapters.Add(chapter);
+
+                        var isLastChapter = this.scrapperService.IsLastSection(document);
+                        sameChapter = (isLastChapter != true); 
                     }
 
-                    chapters.Add(chapter);
+                    book.Chapters = chapters;
 
-                    var isLastChapter = this.scrapperService.IsLastSection(document);
-                    sameChapter = (isLastChapter != true); 
+                    return Ok(book);*/
                 }
-
-                book.Chapters = chapters;
-
-                return Ok(book);*/
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+
+            
             return BadRequest();
         }
 

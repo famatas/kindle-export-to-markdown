@@ -3,7 +3,7 @@ using KindleExportToMarkdown.Interfaces;
 
 namespace KindleExportToMarkdown.Services
 {
-    public class HTMLScrapperServiceV2 : IScrapperServiceV2
+    public class HTMLScrapperService : IScrapperService
     {
         public string GetTitle(HtmlDocument document) => GetNodeValue(document, "div.bookTitle");
 
@@ -74,6 +74,26 @@ namespace KindleExportToMarkdown.Services
         {
             var node = document.DocumentNode.QuerySelector(selector);
             return node;
+        }
+
+        public string GetSectionTitle(HtmlDocument document, int index)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetNoteText(HtmlDocument document, int index)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetNoteHeading(HtmlDocument document, int index)
+        {
+            throw new NotImplementedException();
+        }
+
+        public HtmlNode GetNoteHeadingNode(HtmlDocument document, int index)
+        {
+            throw new NotImplementedException();
         }
     }
 }

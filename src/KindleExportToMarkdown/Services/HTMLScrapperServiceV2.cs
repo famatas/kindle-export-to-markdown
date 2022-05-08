@@ -3,7 +3,7 @@ using KindleExportToMarkdown.Interfaces;
 
 namespace KindleExportToMarkdown.Services
 {
-    public class HTMLScrapperService : IScrapperServiceV2
+    public class HTMLScrapperServiceV2 : IScrapperServiceV2
     {
         public string GetTitle(HtmlDocument document) => GetNodeValue(document, "div.bookTitle");
 
@@ -24,13 +24,13 @@ namespace KindleExportToMarkdown.Services
 
         public HtmlNode GetNoteHeadingNode(HtmlDocument document, int index) => GetNode(document, $"div.sectionHeading-{index}");
 
-        public void RemoveNoteText(HtmlDocument document) => RemoveElement(document, "div.noteText");
+        public void RemoveNoteText(HtmlDocument document, int index) => RemoveElement(document, $"div.noteText-{index}");
 
         public bool IsLastSection(HtmlDocument document) => ContainsElement(document, "div.sectionHeading");
 
         public string GetNoteText(HtmlDocument document, int index) => GetNodeValue(document, $"div.noteText-{index}");   
 
-        public string GetNoteHeading(HtmlDocument document) => GetNodeValue(document, "div.noteHeading");
+        public string GetNoteHeading(HtmlDocument document, int index) => GetNodeValue(document, $"div.noteHeading-{index}");
 
         public bool IsNextElementNewChapter(HtmlDocument document)
         {
@@ -68,25 +68,18 @@ namespace KindleExportToMarkdown.Services
         {
             return GetNode(document, selector) == null;
         }
+        // TODO: Review best null practices
         private string GetNodeValue(HtmlDocument document, string selector)
         {
-            return GetNode(document, selector).InnerText.Trim();
+            var node = GetNode(document, selector);
+            if (node != null) return node.InnerText.Trim();
+            else return null;
         }
 
         private HtmlNode GetNode(HtmlDocument document, string selector)
         {
             var node = document.DocumentNode.QuerySelector(selector);
             return node;
-        }
-
-        public string GetNoteHeading(HtmlDocument document, int index)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void RemoveNoteHeading(HtmlDocument document)
-        {
-            throw new NotImplementedException();
         }
     }
 }

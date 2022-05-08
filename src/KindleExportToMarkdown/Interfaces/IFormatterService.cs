@@ -6,5 +6,7 @@
         string FormatNotePage(string value);
         string FormatSubTitle(string value);
         bool ContainsSubTitle(string value);
+
+        string RemoveExtraSpaces(string value);
     }
 }

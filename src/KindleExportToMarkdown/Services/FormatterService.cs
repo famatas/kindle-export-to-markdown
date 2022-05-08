@@ -30,5 +30,13 @@ namespace KindleExportToMarkdown.Services
         {
             return Regex.Match(value, pattern).Value;
         }
+
+        public string RemoveExtraSpaces(string value)
+        {
+            var c = value.Replace("\r\n", string.Empty);
+            c = c.Replace(Environment.NewLine, string.Empty);
+            c = Regex.Replace(c, @"\s+", " ");
+            return c;
+        }
     }
 }
