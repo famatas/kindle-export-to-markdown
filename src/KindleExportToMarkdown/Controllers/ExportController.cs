@@ -2,6 +2,7 @@
 using KindleExportToMarkdown.Interfaces;
 using KindleExportToMarkdown.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Text;
 
 namespace KindleExportToMarkdown.Controllers
 {
@@ -176,7 +177,19 @@ namespace KindleExportToMarkdown.Controllers
         public IActionResult GetBookMarkdown(Book book)
         {            
             return Ok(formatterService.GetMarkdownCode(book));
-        } 
+        }
+
+        [HttpPost(Name = "GetPDF")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public IActionResult GetPDF(FileContent book)
+        {            
+            
+            byte[] byteArray = Encoding.ASCII.GetBytes(fileService.GetPdfFile(book.Content));
+            MemoryStream stream = new MemoryStream(byteArray);
+
+            return Ok(File(stream, "application/pdf", "DownloadName.pdf"));
+        }
     }
 }
 

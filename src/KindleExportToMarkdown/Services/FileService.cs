@@ -1,4 +1,7 @@
-﻿using KindleExportToMarkdown.Interfaces;
+﻿using Aspose.Html;
+using Aspose.Html.Converters;
+using Aspose.Html.Saving;
+using KindleExportToMarkdown.Interfaces;
 using KindleExportToMarkdown.Models;
 using System.Text;
 
@@ -7,7 +10,6 @@ namespace KindleExportToMarkdown.Services
     public class FileService : IFileService
     {
         private string[] permittedExtensions = { ".html", ".txt" };
-
         public bool isValidFile(IFormFile file)
         {
             return (!isEmpty(file) && isValidFormat(file));
@@ -69,6 +71,23 @@ namespace KindleExportToMarkdown.Services
         {
             var fileExt = Path.GetExtension(file.FileName.Substring(1));
             return permittedExtensions.Contains(fileExt);
+        }
+
+        public string GetPdfFile(string text)
+        {
+            string OutputDir = "temp";
+            string sourcePath = Path.Combine(OutputDir, "document.md");
+            File.WriteAllText(sourcePath, text);
+            
+            string savePath = Path.Combine(OutputDir, "document-output.pdf");
+
+            // Convert Markdown to HTML document
+            using var document = Converter.ConvertMarkdown(sourcePath);
+
+            // Convert HTML document to PDF image file format
+            Converter.ConvertHTML(document, new PdfSaveOptions(), savePath);
+
+            return document.TextContent;
         }
     }
 }

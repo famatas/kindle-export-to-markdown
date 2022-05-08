@@ -1,4 +1,5 @@
-﻿using KindleExportToMarkdown.Models;
+﻿using Aspose.Html;
+using KindleExportToMarkdown.Models;
 
 namespace KindleExportToMarkdown.Interfaces
 {
@@ -9,5 +10,7 @@ namespace KindleExportToMarkdown.Interfaces
         bool isValidFile(IFormFile file);
 
         Task<Document> UpdateClasses(IFormFile file);
+
+        string GetPdfFile(string text);
     }
 }
