@@ -1,25 +1,26 @@
 ﻿using HtmlAgilityPack;
+using KindleExportToMarkdown.Constants;
 using KindleExportToMarkdown.Interfaces;
 
 namespace KindleExportToMarkdown.Services
 {
     public class HTMLScrapperService : IScrapperService
     {
-        public string GetTitle(HtmlDocument document) => GetNodeValue(document, "div.bookTitle");        
+        public string GetTitle(HtmlDocument document) => GetNodeValue(document, HTMLSelectors.BookTitle);        
 
-        public string GetAuthor(HtmlDocument document) => GetNodeValue(document, "div.authors");
+        public string GetAuthor(HtmlDocument document) => GetNodeValue(document, HTMLSelectors.Authors);
 
-        public string GetSectionTitle(HtmlDocument document, int index) => GetNodeValue(document, $"div.sectionHeading-{index}");
+        public string GetSectionTitle(HtmlDocument document, int index) => GetNodeValue(document, $"{HTMLSelectors.ChapterTitle}-{index}");
         
-        public void RemoveNoteHeading(HtmlDocument document, int index) => RemoveElement(document, $"div.noteHeading-{index}");
+        public void RemoveNoteHeading(HtmlDocument document, int index) => RemoveElement(document, $"{HTMLSelectors.Note}-{index}");
 
-        public HtmlNode GetNoteHeadingNode(HtmlDocument document, int index) => GetNode(document, $"div.sectionHeading-{index}");
+        public HtmlNode GetNoteHeadingNode(HtmlDocument document, int index) => GetNode(document, $"{HTMLSelectors.ChapterTitle}-{index}");
 
-        public void RemoveNoteText(HtmlDocument document, int index) => RemoveElement(document, $"div.noteText-{index}");
+        public void RemoveNoteText(HtmlDocument document, int index) => RemoveElement(document, $"{HTMLSelectors.HighlightText}-{index}");
 
-        public string GetNoteText(HtmlDocument document, int index) => GetNodeValue(document, $"div.noteText-{index}");   
+        public string GetNoteText(HtmlDocument document, int index) => GetNodeValue(document, $"{HTMLSelectors.HighlightText}-{index}");   
 
-        public string GetNoteHeading(HtmlDocument document, int index) => GetNodeValue(document, $"div.noteHeading-{index}");
+        public string GetNoteHeading(HtmlDocument document, int index) => GetNodeValue(document, $"{HTMLSelectors.Note}-{index}");
 
         private HtmlNode GetNode(HtmlDocument document, string selector) => document.DocumentNode.QuerySelector(selector);
 
