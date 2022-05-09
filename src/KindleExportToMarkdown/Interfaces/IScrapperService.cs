@@ -7,13 +7,14 @@ namespace KindleExportToMarkdown.Interfaces
         HtmlDocument GetDocument(string document);
         string GetTitle(HtmlDocument document);
         string GetAuthor(HtmlDocument document);        
-        string GetSectionTitle(HtmlDocument document);        
-        string GetNoteText(HtmlDocument document);        
-        string GetNoteHeading(HtmlDocument document);
+        string GetSectionTitle(HtmlDocument document, int index);        
+        string GetNoteText(HtmlDocument document, int index);        
+        string GetNoteHeading(HtmlDocument document, int index);
+        HtmlNode GetNoteHeadingNode(HtmlDocument document, int index);
         void RemoveSectionTitle(HtmlDocument document);
-        void RemoveNoteHeading(HtmlDocument document);
+        void RemoveNoteHeading(HtmlDocument document, int index);
         bool IsLastSection(HtmlDocument document);
         bool IsNextElementNewChapter(HtmlDocument document);
-        void RemoveNoteText(HtmlDocument document);
+        void RemoveNoteText(HtmlDocument document, int index);
     }
 }

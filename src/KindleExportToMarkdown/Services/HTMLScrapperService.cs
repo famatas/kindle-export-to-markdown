@@ -16,18 +16,21 @@ namespace KindleExportToMarkdown.Services
 
         public string GetAuthor(HtmlDocument document) => GetNodeValue(document, "div.authors");
 
-        public string GetSectionTitle(HtmlDocument document) => GetNodeValue(document, "div.sectionHeading");
+        public string GetSectionTitle(HtmlDocument document, int index) => GetNodeValue(document, $"div.sectionHeading-{index}");
         
         public void RemoveSectionTitle(HtmlDocument document) => RemoveElement(document, "div.sectionHeading");
 
-        public void RemoveNoteHeading(HtmlDocument document) => RemoveElement(document, "div.noteHeading");
-        public void RemoveNoteText(HtmlDocument document) => RemoveElement(document, "div.noteText");
+        public void RemoveNoteHeading(HtmlDocument document, int index) => RemoveElement(document, $"div.noteHeading-{index}");
+
+        public HtmlNode GetNoteHeadingNode(HtmlDocument document, int index) => GetNode(document, $"div.sectionHeading-{index}");
+
+        public void RemoveNoteText(HtmlDocument document, int index) => RemoveElement(document, $"div.noteText-{index}");
 
         public bool IsLastSection(HtmlDocument document) => ContainsElement(document, "div.sectionHeading");
 
-        public string GetNoteText(HtmlDocument document) => GetNodeValue(document, "div.noteText");   
+        public string GetNoteText(HtmlDocument document, int index) => GetNodeValue(document, $"div.noteText-{index}");   
 
-        public string GetNoteHeading(HtmlDocument document) => GetNodeValue(document, "div.noteHeading");
+        public string GetNoteHeading(HtmlDocument document, int index) => GetNodeValue(document, $"div.noteHeading-{index}");
 
         public bool IsNextElementNewChapter(HtmlDocument document)
         {
@@ -65,35 +68,18 @@ namespace KindleExportToMarkdown.Services
         {
             return GetNode(document, selector) == null;
         }
+        // TODO: Review best null practices
         private string GetNodeValue(HtmlDocument document, string selector)
         {
-            return GetNode(document, selector).InnerText.Trim();
+            var node = GetNode(document, selector);
+            if (node != null) return node.InnerText.Trim();
+            else return null;
         }
 
         private HtmlNode GetNode(HtmlDocument document, string selector)
         {
             var node = document.DocumentNode.QuerySelector(selector);
             return node;
-        }
-
-        public string GetSectionTitle(HtmlDocument document, int index)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string GetNoteText(HtmlDocument document, int index)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string GetNoteHeading(HtmlDocument document, int index)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HtmlNode GetNoteHeadingNode(HtmlDocument document, int index)
-        {
-            throw new NotImplementedException();
         }
     }
 }

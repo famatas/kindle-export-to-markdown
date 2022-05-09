@@ -1,8 +1,6 @@
-﻿using HtmlAgilityPack;
-using KindleExportToMarkdown.Interfaces;
+﻿using KindleExportToMarkdown.Interfaces;
 using KindleExportToMarkdown.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Text;
 
 namespace KindleExportToMarkdown.Controllers
 {
@@ -11,10 +9,10 @@ namespace KindleExportToMarkdown.Controllers
     public class ExportController : ControllerBase
     {
         private IFileService fileService;
-        private IScrapperServiceV2 scrapperService;
+        private IScrapperService scrapperService;
         private IFormatterService formatterService;
 
-        public ExportController(IFileService fileService, IScrapperServiceV2 scrapperService, IFormatterService formatterService)
+        public ExportController(IFileService fileService, IScrapperService scrapperService, IFormatterService formatterService)
         {
             this.fileService = fileService;
             this.scrapperService = scrapperService;
@@ -24,7 +22,7 @@ namespace KindleExportToMarkdown.Controllers
         [HttpPost(Name = "ExportBookDefinition")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> ExportToMarkdown(IFormFile file)
+        public async Task<IActionResult> ExportBookDefinition(IFormFile file)
         {
             try
             {
@@ -140,55 +138,12 @@ namespace KindleExportToMarkdown.Controllers
             return BadRequest();
         }
 
-        [HttpGet(Name = "test")]
-        public async Task<IActionResult> Test()
-        {
-            var html =
-        @"<!DOCTYPE html>
-            <html>
-            <body>
-	            <h1>This is <b>bold</b> heading</h1>
-	            <p>This is <u>underlined</u> paragraph</p>
-	            <h2>This is <i>italic</i> heading</h2>
-	            <h2>This is new heading</h2>
-            </body>
-            </html> ";
-
-            var htmlDoc = new HtmlDocument();
-            htmlDoc.LoadHtml(html);
-
-            var node = htmlDoc.DocumentNode.SelectSingleNode("//body/h1");
-
-            HtmlNode sibling = node.NextSibling;
-
-            while (sibling != null)
-            {
-                if (sibling.NodeType == HtmlNodeType.Element)
-                    Console.WriteLine(sibling.OuterHtml.Contains("underlined"));
-
-                sibling = sibling.NextSibling;
-            }
-            return Ok();
-        }
-
         [HttpPost(Name = "GetBookMarkdown")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult GetBookMarkdown(Book book)
         {            
             return Ok(formatterService.GetMarkdownCode(book));
-        }
-
-        [HttpPost(Name = "GetPDF")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public IActionResult GetPDF(FileContent book)
-        {            
-            
-            byte[] byteArray = Encoding.ASCII.GetBytes(fileService.GetPdfFile(book.Content));
-            MemoryStream stream = new MemoryStream(byteArray);
-
-            return Ok(File(stream, "application/pdf", "DownloadName.pdf"));
         }
     }
 }
