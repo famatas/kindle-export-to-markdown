@@ -28,32 +28,19 @@ namespace KindleExportToMarkdown.Services
         {
             var content = await ReadContent(file);
             var indexSection = 0;
-            var result = new StringBuilder();            
+            var result = new StringBuilder();
+            var pattern = $"(\\\")$";
             using (var reader = new StringReader(content))
             {
                 for (string line = reader.ReadLine(); line != null; line = reader.ReadLine())
                 {
+                    if (line.Contains(CssClasses.Note)) line = line.Replace(CssClasses.Note,  Regex.Replace(CssClasses.Note, pattern, $"-{ indexSection}\""));
 
-                    c = Regex.Replace(c, @"\s+", " ");
-
-
-
-                    //if (line.Contains("class=\"noteHeading\"")) line = line.Replace("class=\"noteHeading\"", $"class=\"noteHeading-{indexSection}\"");
-
-                    if (line.Contains(CssClasses.Note)) line = line.Replace(CssClasses.Note,  Regex.Replace(CssClasses.Note, $"(\\"")$" , $"-{ indexSection}\"); // CHECK
-
-                    /*if (line.Contains("class=\"noteText\"")) line = line.Replace("class=\"noteText\"", $"class=\"noteText-{indexSection}\"");
-                    if (line.Contains("class=\"sectionHeading\"")) 
-                    {
-                        indexSection++;
-                        line = line.Replace("class=\"sectionHeading\"", $"class=\"sectionHeading-{indexSection}\""); 
-                    }*/
-
-                    if (line.Contains(CssClasses.HighlightText)) line = line.Replace(CssClasses.HighlightText, CssClasses.HighlightText.Replace("\"", $"-{ indexSection}\""));
+                    if (line.Contains(CssClasses.HighlightText)) line = line.Replace(CssClasses.HighlightText, Regex.Replace(CssClasses.HighlightText, pattern, $"-{ indexSection}\""));
                     if (line.Contains(CssClasses.ChapterTitle))
                     {
                         indexSection++;
-                        line = line.Replace(CssClasses.ChapterTitle, CssClasses.ChapterTitle.Replace("\"", $"-{ indexSection}\""));
+                        line = line.Replace(CssClasses.ChapterTitle, Regex.Replace(CssClasses.ChapterTitle, pattern, $"-{ indexSection}\""));
                     }
 
 
