@@ -26,33 +26,43 @@ namespace KindleExportToMarkdown.Services
 
         public async Task<Document> UpdateClasses(IFormFile file)
         {
-            var content = await ReadContent(file);
-            var indexSection = 0;
-            var result = new StringBuilder();
-            var pattern = $"(\\\")$";
-            using (var reader = new StringReader(content))
+            try
             {
-                for (string line = reader.ReadLine(); line != null; line = reader.ReadLine())
+                var content = await ReadContent(file);
+                var indexSection = 0;
+                var result = new StringBuilder();
+                using (var reader = new StringReader(content))
                 {
-                    if (line.Contains(CssClasses.Note)) line = line.Replace(CssClasses.Note,  Regex.Replace(CssClasses.Note, pattern, $"-{ indexSection}\""));
-
-                    if (line.Contains(CssClasses.HighlightText)) line = line.Replace(CssClasses.HighlightText, Regex.Replace(CssClasses.HighlightText, pattern, $"-{ indexSection}\""));
-                    if (line.Contains(CssClasses.ChapterTitle))
+                    for (string line = reader.ReadLine(); line != null; line = reader.ReadLine())
                     {
-                        indexSection++;
-                        line = line.Replace(CssClasses.ChapterTitle, Regex.Replace(CssClasses.ChapterTitle, pattern, $"-{ indexSection}\""));
+                        if (line.Contains(CssClasses.Note)) line = ReplacePattern(CssClasses.Note, indexSection, line);
+                        if (line.Contains(CssClasses.HighlightText)) line = ReplacePattern(CssClasses.HighlightText, indexSection, line);
+                        if (line.Contains(CssClasses.ChapterTitle))
+                        {
+                            indexSection++;
+                            line = ReplacePattern(CssClasses.ChapterTitle, indexSection, line);
+                        }
+
+                        result.Append(line.Clone());
                     }
-
-
-                    result.Append(line.Clone());
                 }
-            }
 
-            return new Document()
+                return new Document()
+                {
+                    Content = result.ToString(),
+                    Size = indexSection
+                };
+            } catch (Exception ex)
             {
-                Content = result.ToString(),
-                Size = indexSection
-            };
+                Console.WriteLine(ex); // HANDLE EXCEPTION
+                return null;
+            }            
+        }
+
+        private string ReplacePattern(string cssClass, int indexSection, string line)
+        {
+            var pattern = $"(\\\")$";
+            return line.Replace(cssClass, Regex.Replace(cssClass, pattern, $"-{ indexSection}\""));
         }
 
         private bool isEmpty(IFormFile file) => file.Length == 0;
