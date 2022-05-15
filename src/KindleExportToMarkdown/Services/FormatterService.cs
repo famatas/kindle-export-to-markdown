@@ -1,4 +1,5 @@
-﻿using KindleExportToMarkdown.Interfaces;
+﻿using KindleExportToMarkdown.Constants;
+using KindleExportToMarkdown.Interfaces;
 using KindleExportToMarkdown.Models;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -7,62 +8,64 @@ namespace KindleExportToMarkdown.Services
 {
     public class FormatterService : IFormatterService
     {
-        public bool ContainsSubTitle(string value)
-        {
-            return !string.IsNullOrEmpty(FormatSubTitle(value));
-        }
+        private const string NotePageFormat = @"(-|>) ([A-Z])\w+ [0-9]+";
+        private const string SubtitleFormat = @"(:) (.*?) >";
 
-        public string FormatNotePage(string value)
-        {
-            return GetRegexMatch(value, @"(-|>) ([A-Z])\w+ [0-9]+");
-        }
+        public bool ContainsSubTitle(string value) => !string.IsNullOrEmpty(FormatSubTitle(value));
+
+        public string FormatNotePage(string value) => GetRegexMatch(value, NotePageFormat);
+
+        public string GetRegexMatch(string value, string pattern) => Regex.Match(value, pattern).Value;
+
+        public string RemoveExtraSpaces(string value) => Regex.Replace(RemoveEmptyLines(value), @"\s+", " ");        
 
         public string FormatSubTitle(string value)
         {
-            // regex: - (:) (.*?) >
-            var c = value.Replace("\r\n", string.Empty);
-            c = c.Replace(System.Environment.NewLine, string.Empty);
-            c = Regex.Replace(c, @"\s+", " ");
-            var a = GetRegexMatch(c, @"(:) (.*?) >");
-            var s = !string.IsNullOrEmpty(a) ? a.Substring(1, a.Length - 2).Trim() : "";
-            return s;
-        }
-        public string GetRegexMatch(string value, string pattern)
-        {
-            return Regex.Match(value, pattern).Value;
-        }
-
-        public string RemoveExtraSpaces(string value)
-        {
-            var c = value.Replace("\r\n", string.Empty);
-            c = c.Replace(Environment.NewLine, string.Empty);
-            c = Regex.Replace(c, @"\s+", " ");
-            return c;
+            var newValue = Regex.Replace(RemoveEmptyLines(value), @"\s+", " ");
+            var regexMatch = GetRegexMatch(newValue, SubtitleFormat);
+            return !string.IsNullOrEmpty(regexMatch) ? regexMatch[1..^1].Trim() : "";
         }
 
         public string GetMarkdownCode(Book book)
         {
             StringBuilder strb = new StringBuilder();
 
-            strb.Append("# ").Append(book.Title).Append("\n\n");
-            strb.Append("> ").Append(book.Author).Append("\n\n");
+            strb.Append(FormatTitle1(book.Title));
+            strb.Append(FormatAuthor(book.Author));
 
             foreach (var chapter in book.Chapters)
-            {
-                strb.Append("\n\n").Append("## ").Append(chapter.Title).Append("\n\n");
+            {           
+                strb.Append(FormatTitle2(chapter.Title));
 
                 foreach (var subChapter in chapter.Subchapters)
                 {
-                    strb.Append("### ").Append(subChapter.Title).Append("\n\n\n");
+                    strb.Append(FormatTitle3(subChapter.Title));
 
                     foreach (var highlight in subChapter.Highlights)
-                    {
-                        strb.Append("- ").Append(highlight.Content).Append(" **").Append(highlight.Page).Append("**").Append("\n\n");
-                    }
+                        strb.Append(FormatHighlight(highlight.Content, highlight.Page));
                 }
             }
 
             return strb.ToString();
         }
+
+        private string RemoveEmptyLines(string value) => value.Replace("\r\n", string.Empty).Replace(Environment.NewLine, string.Empty);
+
+        private string FormatElement(string label, string value) => (string)label.Concat(value);
+
+        private string FormatTitle1(string title) => (string)FormatElement(MarkdownLabels.Title, title).Concat("\n\n");
+
+        private string FormatTitle2(string title) => (string)"\n\n".Concat(FormatElement(MarkdownLabels.Title2, title)).Concat("\n\n");
+
+        private string FormatTitle3(string title) => (string)(FormatElement(MarkdownLabels.Title3, title).Concat("\n\n\n"));
+
+        private string FormatAuthor(string author) => (string)(FormatElement(MarkdownLabels.Note, author).Concat("\n\n"));
+
+        private string FormatHighlight(string highlight, string page) => (string)"- ".Concat(highlight).
+            Concat(" ").
+            Concat(MarkdownLabels.Bold).
+            Concat(page).
+            Concat(MarkdownLabels.Bold).
+            Concat("\n\n");
     }
 }

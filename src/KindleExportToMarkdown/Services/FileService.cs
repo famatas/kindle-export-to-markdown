@@ -59,11 +59,7 @@ namespace KindleExportToMarkdown.Services
             }            
         }
 
-        private string ReplacePattern(string cssClass, int indexSection, string line)
-        {
-            var pattern = $"(\\\")$";
-            return line.Replace(cssClass, Regex.Replace(cssClass, pattern, $"-{ indexSection}\""));
-        }
+        private string ReplacePattern(string cssClass, int indexSection, string line) => line.Replace(cssClass, Regex.Replace(cssClass, $"(\\\")$", $"-{ indexSection}\""));
 
         private bool isEmpty(IFormFile file) => file.Length == 0;
 
