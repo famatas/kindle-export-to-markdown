@@ -49,23 +49,18 @@ namespace KindleExportToMarkdown.Services
             return strb.ToString();
         }
 
-        private string RemoveEmptyLines(string value) => value.Replace("\r\n", string.Empty).Replace(Environment.NewLine, string.Empty);
+        private string RemoveEmptyLines(string value) => value.Replace($"\r\n", string.Empty).Replace(Environment.NewLine, string.Empty);
 
-        private string FormatElement(string label, string value) => (string)label.Concat(value);
+        private string? FormatElement(string label, string value) => label + value;
 
-        private string FormatTitle1(string title) => (string)FormatElement(MarkdownLabels.Title, title).Concat("\n\n");
+        private string? FormatTitle1(string title) => FormatElement(MarkdownLabels.Title, title) + $"\n\n";
 
-        private string FormatTitle2(string title) => (string)"\n\n".Concat(FormatElement(MarkdownLabels.Title2, title)).Concat("\n\n");
+        private string FormatTitle2(string title) => $"\n\n" + FormatElement(MarkdownLabels.Title2, title) + $"\n\n";
 
-        private string FormatTitle3(string title) => (string)(FormatElement(MarkdownLabels.Title3, title).Concat("\n\n\n"));
+        private string FormatTitle3(string title) => FormatElement(MarkdownLabels.Title3, title) + $"\n\n\n";
 
-        private string FormatAuthor(string author) => (string)(FormatElement(MarkdownLabels.Note, author).Concat("\n\n"));
+        private string FormatAuthor(string author) => FormatElement(MarkdownLabels.Note, author) + $"\n\n";
 
-        private string FormatHighlight(string highlight, string page) => (string)"- ".Concat(highlight).
-            Concat(" ").
-            Concat(MarkdownLabels.Bold).
-            Concat(page).
-            Concat(MarkdownLabels.Bold).
-            Concat("\n\n");
+        private string FormatHighlight(string highlight, string page) => "- " + highlight + " " + MarkdownLabels.Bold + page + MarkdownLabels.Bold + $"\n\n";
     }
 }
