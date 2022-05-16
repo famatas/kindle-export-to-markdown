@@ -8,9 +8,9 @@ namespace KindleExportToMarkdown.Controllers
     [ApiController]
     public class ExportController : ControllerBase
     {
-        private IFileService fileService;
-        private IScrapperService scrapperService;
-        private IFormatterService formatterService;
+        private readonly IFileService fileService;
+        private readonly IScrapperService scrapperService;
+        private readonly IFormatterService formatterService;
 
         public ExportController(IFileService fileService, IScrapperService scrapperService, IFormatterService formatterService)
         {
