@@ -1,4 +1,5 @@
-﻿using KindleExportToMarkdown.Interfaces;
+﻿using KindleExportToMarkdown.Exceptions;
+using KindleExportToMarkdown.Interfaces;
 using KindleExportToMarkdown.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -30,7 +31,14 @@ namespace KindleExportToMarkdown.Controllers
                 {
                     var book = await GetBookContent(file);
                     return Ok(formatterService.GetMarkdownCode(book));
+                } else
+                {
+                    throw new InvalidFileTypeException($"Invalid file type {Path.GetExtension(file.FileName)}");
                 }
+            }
+            catch (InvalidFileTypeException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
