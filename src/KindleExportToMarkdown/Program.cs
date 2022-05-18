@@ -14,6 +14,9 @@ builder.Services.AddSingleton<IFileService, FileService>();
 builder.Services.AddSingleton<IScrapperService, HTMLScrapperService>();
 builder.Services.AddSingleton<IFormatterService, FormatterService>();
 
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -2,6 +2,7 @@
 using Aspose.Html.Converters;
 using Aspose.Html.Saving;
 using KindleExportToMarkdown.Constants;
+using KindleExportToMarkdown.Exceptions;
 using KindleExportToMarkdown.Interfaces;
 using KindleExportToMarkdown.Models;
 using System.Text;
@@ -12,6 +13,12 @@ namespace KindleExportToMarkdown.Services
     public class FileService : IFileService
     {
         private string[] permittedExtensions = { ".html", ".txt" };
+        private readonly ILogger _logger;
+
+        public FileService(ILogger<FileService> logger)
+        {
+            _logger = logger;
+        }
 
         public bool isValidFile(IFormFile file) => (!isEmpty(file) && isValidFormat(file));
 
@@ -54,8 +61,10 @@ namespace KindleExportToMarkdown.Services
                 };
             } catch (Exception ex)
             {
-                Console.WriteLine(ex); // HANDLE EXCEPTION
-                return null;
+                _logger.LogWarning($"Error: {ex.Message}");
+                _logger.LogWarning($"Stack: {ex.StackTrace}");
+                
+                throw new MalFormedHtmlException("Error reading CSS Classes");
             }            
         }
 
